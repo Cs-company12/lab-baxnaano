@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="so">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Management System</title>
+    <link rel="icon" href="IMAGES/download.png" type="image/png">
+    
+    <!-- CDN imports -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); background-attachment: fixed; min-height: 100vh; color: #333; }
+        .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .login-box { background: white; padding: 2.5rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); width: 100%; max-width: 400px; }
+        .login-box h2 { margin-bottom: 1.5rem; text-align: center; color: #667eea; }
+        .login-input { width: 100%; padding: 12px 15px; margin-bottom: 1rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; transition: all 0.3s; }
+        .login-input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+        .login-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: transform 0.2s; }
+        .login-btn:hover { transform: translateY(-2px); }
+        .navbar { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 1rem 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000; display: none; }
+        .nav-brand { font-size: 1.4rem; font-weight: bold; color: #667eea; }
+        .nav-menu { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+        .nav-btn { padding: 8px 16px; border: none; background: #f0f0f0; border-radius: 8px; cursor: pointer; transition: all 0.3s; font-size: 14px; }
+        .nav-btn:hover { background: #667eea; color: white; }
+        .nav-btn.active { background: #667eea; color: white; }
+        .nav-right { margin-left: auto; display: flex; gap: 1rem; align-items: center; }
+        .user-info { font-weight: 500; color: #667eea; }
+        .unified-section { min-height: 100vh; padding: 2rem 1.5rem; display: none; }
+        .unified-section.active { display: block; animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .stat { background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s; }
+        .stat:hover { transform: translateY(-5px); }
+        .stat small { font-size: 0.85rem; color: #6c757d; }
+        .stat div { font-size: 1.8rem; font-weight: bold; color: #667eea; margin-top: 0.5rem; }
+        .card-modern { background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 1rem; }
+        .table { width: 100%; border-collapse: collapse; }
+        .table th { background: #f8f9fa; padding: 12px; text-align: left; border-bottom: 2px solid #e0e0e0; }
+        .table td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; }
+        .btn-accent { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+        .btn-accent:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .btn-danger { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+        .btn-sm { padding: 4px 8px; font-size: 0.85rem; }
+        .form-control { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        .form-select { padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 1rem; }
+        .mt-3 { margin-top: 1rem; }
+        .mb-3 { margin-bottom: 1rem; }
+        .mb-4 { margin-bottom: 1.5rem; }
+        .mt-4 { margin-top: 1.5rem; }
+        .d-flex { display: flex; }
+        .d-none { display: none !important; }
+        .d-block { display: block !important; }
+        .w-100 { width: 100%; }
+        .w-auto { width: auto; }
+        .ms-auto { margin-left: auto; }
+        .flex-wrap { flex-wrap: wrap; }
+        .text-center { text-align: center; }
+        .text-muted { color: #6c757d; }
+        .text-success { color: #28a745; }
+        .text-warning { color: #ffc107; }
+        .text-danger { color: #dc3545; }
+        .table-warning { background-color: #fff3cd; }
+        .alert { padding: 12px; border-radius: 6px; margin-bottom: 1rem; }
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #dc3545; }
+        .list-group { list-style: none; padding: 0; }
+        .list-group-item { padding: 12px; border: 1px solid #e0e0e0; border-bottom: none; background: white; }
+        .list-group-item:last-child { border-bottom: 1px solid #e0e0e0; border-radius: 0 0 6px 6px; }
+        .list-group-item:first-child { border-radius: 6px 6px 0 0; }
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; }
+        .bg-primary { background: #667eea; color: white; }
+        .bg-danger { background: #dc3545; color: white; }
+        .bg-warning { background: #ffc107; color: #000; }
+        .bg-success { background: #28a745; color: white; }
+        .rounded-pill { border-radius: 50rem; }
+        .justify-content-between { justify-content: space-between; }
+        .align-items-center { align-items: center; }
+        .expired { background-color: #f8d7da !important; }
+        .expiring-soon { background-color: #fff3cd !important; }
+        .role-admin { display: none; }
+        .role-cashier { display: none; }
+        .show-admin { display: block !important; }
+        .show-cashier { display: block !important; }
+        @media (max-width: 768px) {
+            .unified-section { padding: 1rem 0.75rem; }
+            .nav-menu { flex-direction: column; width: 100%; margin-top: 1rem; }
+            .nav-btn { width: 100%; }
+            .nav-right { margin-left: 0; margin-top: 1rem; width: 100%; }
+            .login-box { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Login View -->
+<div id="loginContainer" class="login-container">
+    <div class="login-box">
+       <img src="IMAGES/download.png"
+     width="100"
+     height="100"
+     style="display:block; margin:auto;">
+        <h2>🔐 BAXNAANO PHARMACY Login</h2>
+        <input type="text" id="loginUsername" class="login-input" placeholder="Username" maxlength="50" autocomplete="username">
+        <input type="password" id="loginPassword" class="login-input" placeholder="Password" autocomplete="current-password">
+        <button id="loginBtn" class="login-btn">Login</button>
+        <div id="loginAlert" class="alert alert-danger d-none mt-3"></div>
+        <!-- REMOVED: Default credentials display for security -->
+    </div>
+</div>
+
+<!-- Navigation -->
+<div id="navbar" class="navbar">
+     <img src="IMAGES/474461744_3830353873849045_6351787505269396883_n.jpg" style="width:9%; height:auto;">
+    <div class="nav-brand">🧪 Lab Management System</div>
+    <div class="nav-menu" id="navMenu"></div>
+    <div class="nav-right">
+        <span class="user-info" id="userDisplay"></span>
+        <button class="btn-accent" id="logoutBtn">Logout</button>
+        <button class="btn-accent role-admin" id="exportBtn" style="display:none">📥 Export Data</button>
+    </div>
+</div>
+
+<!-- Dashboard View (ADMIN ONLY) -->
+<div id="dashboardView" class="unified-section">
+    <h6 class="mb-3"><i class="bi bi-speedometer2"></i> Lab Stock & Expiry Alerts</h6>
+    <div id="expiredMedicineAlert" class="alert alert-danger d-none">
+        <strong>⚠️ EXPIRED ITEMS FOUND!</strong> Some lab items have expired. Check the Stock & Expiry Alerts section below.
+    </div>
+        <div class="card-modern mt-3"><h6>⚠️ Stock & Expiry Alerts</h6><div id="stockExpiryAlerts"></div></div>
+</div>
+
+<!-- Products View (ADMIN ONLY) -->
+<div id="productsView" class="unified-section">
+    <h6 class="mb-3 role-admin" style="display:none"><i class="bi bi-pills"></i> Manage Products</h6>
+    <form id="productForm" class="row g-2 mb-3 role-admin" style="display:none">
+        <input type="hidden" id="editProductId">
+        <div class="col-md-3"><input id="pName" class="form-control" placeholder="test Name" required maxlength="100"></div>
+        <div class="col-md-1"><input id="pQty" class="form-control" type="number" min="0" placeholder="Qty" required></div>
+        <div class="col-md-2"><input id="pExpiry" class="form-control" type="date" required></div>
+        <div class="col-md-1"><button class="btn-accent w-100" type="submit">Save</button></div>
+    </form>
+    <input id="filterProd" class="form-control mb-3" placeholder="🔍 Filter products...">
+    <div style="max-height:360px;overflow:auto">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Qty</th>
+                    <th>Expiry</th>
+                    <th>Status</th>
+                    <th class="role-admin" style="display:none">Action</th>
+                </tr>
+            </thead>
+            <tbody id="productsTable"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Reports View -->
+<div id="reportsView" class="unified-section">
+    <h6 class="mb-3"><i class="bi bi-calendar-check"></i> Lab Expiry Report</h6>
+    <div class="row g-3" style="display: flex; gap: 1rem;">
+        <div class="col-md-6" style="flex: 1;">
+            <div class="d-flex gap-2 align-items-center mb-3 flex-wrap">
+                <label>📅 Horizon:</label>
+                <select id="reportRange" class="form-select w-auto">
+                    <option value="next30">Next 30 days</option>
+                    <option value="next60">Next 60 days</option>
+                    <option value="next90">Next 90 days</option>
+                    <option value="all">All items</option>
+                    <option value="custom">Custom</option>
+                </select>
+                <input type="date" id="rFrom" style="display:none">
+                <input type="date" id="rTo" style="display:none">
+                <button class="btn-accent" id="printExpiryReportBtn">🖨️ Print Expiry Report</button>
+            </div>
+            <div class="stat mb-3"><small class="text-muted">Expiring Items</small><div id="repTotal">0</div></div>
+            <div class="stat mb-3"><small class="text-muted">Expired Items</small><div id="repExpired">0</div></div>
+            <h6>⚠️ Expiry Alerts</h6>
+            <div id="repItems" style="max-height:260px;overflow:auto"></div>
+        </div>
+        <div class="col-md-6" style="flex: 1;">
+            <h6>📋 Expiring Inventory</h6>
+            <div style="max-height:360px;overflow:auto">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Qty</th>
+                            <th>Expiry</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentSalesTbl"></tbody>
+                </table>
+            </div>
+            <hr>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================================
+// lab POS SYSTEM - FINAL SECURE VERSION
+// ============================================================================
+'use strict';
+
+// ==================== CONFIGURATION ====================
+const CONFIG = {
+    STORAGE_KEYS: {
+        USERS: 'pharma_users_final_v1',
+        SALES: 'pharma_sales_final_v1',
+        PRODUCTS: 'pharma_products_final_v1',
+        AUDIT: 'pharma_audit_final_v1',
+        SESSION: 'pharma_session_final_v1'
+    },
+    ROLES: { ADMIN: 'admin', CASHIER: 'cashier' }
+};
+
+// Global state
+let currentUser = null;
+
+// ==================== SECURITY ====================
+function sanitizeInput(text, maxLength = 500) {
+    if (typeof text !== 'string') return '';
+    return text
+        .replace(/[<>\"'&]/g, char => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#x27;','&':'&amp;'}[char]))
+        .substring(0, maxLength)
+        .trim();
+}
+
+async function hashPassword(password) {
+    try {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(password + 'pharma_salt_secure_2024');
+        const hash = await crypto.subtle.digest('SHA-256', data);
+        return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch {
+        return btoa(password.split('').reverse().join(''));
+    }
+}
+
+// ==================== STORAGE ====================
+function loadData(key, defaultValue = []) {
+    try {
+        const data = localStorage.getItem(key);
+        return data ? JSON.parse(data) : defaultValue;
+    } catch {
+        return defaultValue;
+    }
+}
+
+function saveData(key, data) {
+    try {
+        localStorage.setItem(key, JSON.stringify(data));
+        return true;
+    } catch (e) {
+        console.error('Save error:', e);
+        Swal.fire({icon: 'error', title: 'Storage Error', text: e.message});
+        return false;
+    }
+}
+
+// ==================== DATE HELPERS ====================
+function isExpired(expiryDate) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return new Date(expiryDate) < today;
+}
+
+function isExpiringSoon(expiryDate, days = 30) {
+    const today = new Date();
+    const soon = new Date(today.getTime() + days * 24 * 60 * 60 * 1000);
+    const exp = new Date(expiryDate);
+    return exp >= today && exp <= soon;
+}
+
+function generateId(prefix) {
+    return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
+
+function formatMoney(amount) {
+    return '$' + (parseFloat(amount) || 0).toFixed(2);
+}
+
+// ==================== AUTHENTICATION ====================
+async function checkSession() {
+    const session = localStorage.getItem(CONFIG.STORAGE_KEYS.SESSION);
+    if (session) {
+        const users = loadData(CONFIG.STORAGE_KEYS.USERS);
+        currentUser = users.find(u => u.username === session);
+        if (currentUser) {
+            showMainApp();
+            return;
+        }
+    }
+    showLogin();
+}
+
+function showLogin() {
+    document.getElementById('loginContainer').style.display = 'flex';
+    document.getElementById('navbar').style.display = 'none';
+}
+
+function showMainApp() {
+    document.getElementById('loginContainer').style.display = 'none';
+    document.getElementById('navbar').style.display = 'flex';
+    document.getElementById('userDisplay').textContent = `👤 ${currentUser.username} (${currentUser.role})`;
+    setupNavigation();
+    
+    // Apply role-based visibility
+    document.querySelectorAll('.role-admin').forEach(el => {
+        el.style.display = currentUser.role === CONFIG.ROLES.ADMIN ? 'block' : 'none';
+    });
+    
+    // Show appropriate view based on role
+    if (currentUser.role === CONFIG.ROLES.CASHIER) {
+        // Cashier goes to reports only
+        showView('reports');
+    } else {
+        // Admin goes to dashboard
+        showView('dashboard');
+    }
+}
+
+async function handleLogin() {
+    const username = sanitizeInput(document.getElementById('loginUsername').value, 50);
+    const password = document.getElementById('loginPassword').value;
+    
+    if (!username || !password) {
+        Swal.fire({icon: 'warning', title: 'Enter credentials', timer: 1500});
+        return;
+    }
+    
+    const users = loadData(CONFIG.STORAGE_KEYS.USERS);
+    const user = users.find(u => u.username === username);
+    
+    if (!user) {
+        Swal.fire({icon: 'error', title: 'Invalid credentials', timer: 1500});
+        return;
+    }
+    
+    const hash = await hashPassword(password);
+    if (user.password === hash) {
+        currentUser = user;
+        localStorage.setItem(CONFIG.STORAGE_KEYS.SESSION, username);
+        showMainApp();
+        Swal.fire({icon: 'success', title: 'Login successful', timer: 1500});
+    } else {
+        Swal.fire({icon: 'error', title: 'Invalid credentials', timer: 1500});
+    }
+}
+
+// ==================== NAVIGATION ====================
+function setupNavigation() {
+    const navMenu = document.getElementById('navMenu');
+    navMenu.innerHTML = '';
+    
+    // Define navigation items per role
+    const navItems = {
+        admin: [
+            {view: 'dashboard', label: 'Dashboard'},
+            {view: 'products', label: 'Products'},
+            {view: 'reports', label: 'Reports'}
+        ],
+        cashier: [
+            {view: 'reports', label: 'Reports'}
+        ]
+    };
+    
+    const items = navItems[currentUser.role] || navItems.cashier;
+    
+    items.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'nav-btn';
+        btn.dataset.view = item.view;
+        btn.textContent = item.label;
+        btn.onclick = () => showView(item.view);
+        navMenu.appendChild(btn);
+    });
+    
+    // Set first button as active
+    if (navMenu.firstChild) {
+        navMenu.firstChild.classList.add('active');
+    }
+}
+
+function showView(viewName) {
+    // Hide all sections
+    document.querySelectorAll('.unified-section').forEach(el => el.classList.remove('active'));
+    
+    // Remove active from all nav buttons
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    
+    // Show target section
+    const target = document.getElementById(viewName + 'View');
+    const navBtn = document.querySelector(`[data-view="${viewName}"]`);
+    
+    if (target) target.classList.add('active');
+    if (navBtn) navBtn.classList.add('active');
+    
+    // Role-based content visibility
+    document.querySelectorAll('.role-admin').forEach(el => {
+        el.style.display = currentUser.role === CONFIG.ROLES.ADMIN ? 'block' : 'none';
+    });
+    
+    // Render specific views
+    if (viewName === 'dashboard') renderDashboard();
+    if (viewName === 'products') renderProducts();
+    if (viewName === 'reports') renderReports();
+}
+
+// ==================== DASHBOARD (ADMIN ONLY) ====================
+function renderDashboard() {
+    // Only admin should see this
+    if (currentUser.role !== CONFIG.ROLES.ADMIN) {
+        showView('reports');
+        return;
+    }
+    
+    const products = loadData(CONFIG.STORAGE_KEYS.PRODUCTS);
+    const expiredProducts = products.filter(p => isExpired(p.expiry));
+    const expiredAlert = document.getElementById('expiredMedicineAlert');
+    expiredAlert.classList.toggle('d-none', expiredProducts.length === 0);
+    renderAlerts();
+}
+
+function renderAlerts() {
+    const products = loadData(CONFIG.STORAGE_KEYS.PRODUCTS);
+    const alerts = document.getElementById('stockExpiryAlerts');
+    alerts.innerHTML = '';
+    
+    const frag = document.createDocumentFragment();
+    
+    // Expired
+    products.filter(p => isExpired(p.expiry)).forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'alert alert-danger';
+        div.innerHTML = `<strong>❌ EXPIRED:</strong> ${sanitizeInput(p.name)} (Expired: ${new Date(p.expiry).toLocaleDateString()})`;
+        frag.appendChild(div);
+    });
+    
+    // Expiring soon
+    products.filter(p => isExpiringSoon(p.expiry)).forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'alert alert-warning';
+        div.innerHTML = `<strong>⚠️ Expiring Soon:</strong> ${sanitizeInput(p.name)} (Expiry: ${new Date(p.expiry).toLocaleDateString()})`;
+        frag.appendChild(div);
+    });
+    
+    if (frag.childNodes.length === 0) {
+        alerts.innerHTML = '<p class="text-muted">✅ No alerts.</p>';
+    } else {
+        alerts.appendChild(frag);
+    }
+}
+
+// ==================== PRODUCTS (ADMIN ONLY) ====================
+function renderProducts() {
+    // Only admin can see this
+    if (currentUser.role !== CONFIG.ROLES.ADMIN) {
+        showView('reports');
+        return;
+    }
+    
+    document.getElementById('editProductId').value = '';
+    document.getElementById('pName').value = '';
+    document.getElementById('pQty').value = '';
+    document.getElementById('pExpiry').value = '';
+    document.getElementById('filterProd').value = '';
+    renderProductsTable();
+}
+
+function renderProductsTable(filter = '') {
+    const products = loadData(CONFIG.STORAGE_KEYS.PRODUCTS);
+    const filtered = filter ? products.filter(p => p.name.toLowerCase().includes(filter.toLowerCase())) : products;
+    
+    const tbody = document.getElementById('productsTable');
+    tbody.innerHTML = '';
+    
+    const frag = document.createDocumentFragment();
+    filtered.forEach(p => {
+        const tr = document.createElement('tr');
+        const expired = isExpired(p.expiry);
+        const expiring = isExpiringSoon(p.expiry);
+        tr.className = expired ? 'expired' : (expiring ? 'expiring-soon' : '');
+        
+        tr.innerHTML = `
+            <td>${sanitizeInput(p.name)} ${expired ? '❌' : (expiring ? '⚠️' : '')}</td>
+            <td>${p.qty}</td>
+            <td>${new Date(p.expiry).toLocaleDateString()}</td>
+            <td class="role-admin">
+                <span class="badge ${expired ? 'bg-danger' : (expiring ? 'bg-warning' : 'bg-success')}">
+                    ${expired ? 'Expired' : (expiring ? 'Expiring' : 'Good')}
+                </span>
+            </td>
+            <td>
+                <button class="btn-accent btn-sm" onclick="editProduct('${p.id}')">Edit</button>
+                <button class="btn-danger btn-sm" onclick="deleteProduct('${p.id}')">Delete</button>
+            </td>
+        `;
+        frag.appendChild(tr);
+    });
+    tbody.appendChild(frag);
+}
+
+function handleProductSubmit(e) {
+    // Only admin can submit
+    if (currentUser.role !== CONFIG.ROLES.ADMIN) {
+        Swal.fire({icon: 'error', title: 'Access denied'});
+        return;
+    }
+    
+    e.preventDefault();
+    
+    const id = document.getElementById('editProductId').value;
+    const product = {
+        name: sanitizeInput(document.getElementById('pName').value, 100),
+        qty: parseInt(document.getElementById('pQty').value),
+        expiry: document.getElementById('pExpiry').value
+    };
+
+    if (!product.name || product.qty < 0 || !product.expiry) {
+        Swal.fire({icon: 'warning', title: 'Please fill all fields correctly'});
+        return;
+    }
+    
+    const products = loadData(CONFIG.STORAGE_KEYS.PRODUCTS);
+    
+    if (id) {
+        const index = products.findIndex(p => p.id === id);
+        if (index !== -1) products[index] = {...products[index], ...product};
+    } else {
+        products.push({...product, id: generateId('PROD'), price: 0, cost: 0});
+    }
+    
+    if (saveData(CONFIG.STORAGE_KEYS.PRODUCTS, products)) {
+        Swal.fire({icon: 'success', title: 'Product saved', timer: 1500});
+        renderProducts();
+    }
+}
+
+function editProduct(id) {
+    // Only admin can edit
+    if (currentUser.role !== CONFIG.ROLES.ADMIN) return;
+    
+    const products = loadData(CONFIG.STORAGE_KEYS.PRODUCTS);
+    const product = products.find(p => p.id === id);
+    if (!product) return;
+    
+    document.getElementById('editProductId').value = product.id;
+    document.getElementById('pName').value = product.name;
+    document.getElementById('pQty').value = product.qty;
+    document.getElementById('pExpiry').value = product.expiry;
+}
+
+function deleteProduct(id) {
+    // Only admin can delete
+    if (currentUser.role !== CONFIG.ROLES.ADMIN) return;
+    
+    Swal.fire({
+        title: 'Delete product?',
+        icon: 'warning',
+        showCancelButton: true
+    }).then(result => {
+        if (result.isConfirmed) {
+            const products = loadData(CONFIG.STORAGE_KEYS.PRODUCTS).filter(p => p.id !== id);
+            if (saveData(CONFIG.STORAGE_KEYS.PRODUCTS, products)) {
+                Swal.fire({icon: 'success', title: 'Product deleted', timer: 1500});
+                renderProducts();
+            }
+        }
+    });
+}
+
+// ==================== REPORTS ====================
+function handleReportRangeChange() {
+    const val = document.getElementById('reportRange').value;
+    document.getElementById('rFrom').style.display = val === 'custom' ? 'inline-block' : 'none';
+    document.getElementById('rTo').style.display = val === 'custom' ? 'inline-block' : 'none';
+    renderReports();
+}
+
+function renderReports() {
+    const range = document.getElementById('reportRange').value;
+    let from = null, to = null;
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    if (range === 'next30') {
+        from = today;
+        to = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
+    } else if (range === 'next60') {
+        from = today;
+        to = new Date(today.getTime() + 60 * 24 * 60 * 60 * 1000);
+    } else if (range === 'next90') {
+        from = today;
+        to = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
+    } else if (range === 'all') {
+        from = null;
+        to = null;
+    } else if (range === 'custom') {
+        const f = document.getElementById('rFrom').value;
+        const t = document.getElementById('rTo').value;
+        if (f) { from = new Date(f); from.setHours(0,0,0,0); }
+        if (t) { to = new Date(t); to.setHours(23,59,59,999); }
+    }
+
+    const products = loadData(CONFIG.STORAGE_KEYS.PRODUCTS);
+    const expiring = products.filter(p => {
+        const exp = new Date(p.expiry);
+        if (isExpired(p.expiry)) return false;
+        if (from && exp < from) return false;
+        if (to && exp > to) return false;
+        return true;
+    });
+
+    const expired = products.filter(p => isExpired(p.expiry));
+
+    document.getElementById('repTotal').textContent = expiring.length.toLocaleString();
+    document.getElementById('repExpired').textContent = expired.length.toLocaleString();
+
+    const repItems = document.getElementById('repItems');
+    repItems.innerHTML = '';
+
+    if (expired.length === 0 && expiring.length === 0) {
+        repItems.innerHTML = '<p class="text-muted">No expiry alerts in this range.</p>';
+    } else {
+        const ul = document.createElement('ul');
+        ul.className = 'list-group';
+
+        expired.forEach(p => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item alert-danger';
+            li.innerHTML = `<strong>❌ Expired:</strong> ${sanitizeInput(p.name)} — Expired ${new Date(p.expiry).toLocaleDateString()} (Qty: ${p.qty})`;
+            ul.appendChild(li);
+        });
+
+        expiring.forEach(p => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item alert-warning';
+            li.innerHTML = `<strong>⚠️ Expiring Soon:</strong> ${sanitizeInput(p.name)} — ${new Date(p.expiry).toLocaleDateString()} (Qty: ${p.qty})`;
+            ul.appendChild(li);
+        });
+
+        repItems.appendChild(ul);
+    }
+
+    const tbl = document.getElementById('recentSalesTbl');
+    tbl.innerHTML = '';
+    const frag = document.createDocumentFragment();
+    expiring.concat(expired).sort((a,b) => new Date(a.expiry) - new Date(b.expiry)).forEach(p => {
+        const status = isExpired(p.expiry) ? 'Expired' : 'Expiring';
+        const tr = document.createElement('tr');
+        tr.className = isExpired(p.expiry) ? 'table-warning' : '';
+        tr.innerHTML = `
+            <td>${sanitizeInput(p.name)}</td>
+            <td>${p.qty}</td>
+            <td>${new Date(p.expiry).toLocaleDateString()}</td>
+            <td>${status}</td>
+        `;
+        frag.appendChild(tr);
+    });
+    tbl.appendChild(frag);
+
+}
+
+function printExpiryReport() {
+    const rangeLabel = document.querySelector('#reportRange option:checked').textContent;
+    const expiringCount = document.getElementById('repTotal').textContent;
+    const expiredCount = document.getElementById('repExpired').textContent;
+    const itemsHtml = document.getElementById('repItems').innerHTML;
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <title>Expiry Report</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; }
+                h1, h2 { color: #333; }
+                .badge { display: inline-block; padding: 4px 8px; background: #ffc107; color: #000; border-radius: 6px; margin-left: 8px; }
+                .alert-danger { background: #f8d7da; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+                .alert-warning { background: #fff3cd; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+                th { background: #f1f1f1; }
+                @media print { button { display: none; } }
+                media (max-width: 600px) {
+                    body { padding: 10px; }
+                    h1 { font-size: 1.5rem; }
+                    h2 { font-size: 1.2rem; }
+                }
+                    alert-danger { background: #f8d7da; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+                .alert-warning { background: #fff3cd; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+                h1, h2 { color: #333; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+                th { background: #f1f1f1; }
+                dfn { font-style: italic; color: #555; }
+            
+                
+            </style>
+        </head>
+        <body>
+            <h1>Lab Expiry Report</h1>
+            <p><strong>Range:</strong> ${rangeLabel}</p>
+            <p><strong>Expiring Items:</strong> ${expiringCount} | <strong>Expired Items:</strong> ${expiredCount}</p>
+            <h2>Expiry Alerts</h2>
+            ${itemsHtml}
+            <button onclick="window.print()">Print</button>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+}
+
+// returns feature removed
+
+// ==================== UPDATE ALL
+function updateAll() {
+    if (currentUser.role === CONFIG.ROLES.ADMIN) {
+        renderDashboard();
+    }
+}
+
+// ==================== INITIALIZATION ====================
+async function initDefaultData() {
+    const users = loadData(CONFIG.STORAGE_KEYS.USERS);
+    if (users.length === 0) {
+        saveData(CONFIG.STORAGE_KEYS.USERS, [{
+            username: 'admin',
+            password: await hashPassword('admin123'),
+            role: CONFIG.ROLES.ADMIN
+        }]);
+    }
+    
+    const products = loadData(CONFIG.STORAGE_KEYS.PRODUCTS);
+    if (products.length === 0) {
+        const nextYear = new Date();
+        nextYear.setFullYear(nextYear.getFullYear() + 1);
+        
+        saveData(CONFIG.STORAGE_KEYS.PRODUCTS, [
+            {
+                id: generateId('PROD'),
+                name: 'Amoxicillin 500mg',
+                price: 15.99,
+                cost: 8.50,
+                qty: 100,
+                expiry: nextYear.toISOString().split('T')[0]
+            },
+            {
+                id: generateId('PROD'),
+                name: 'Paracetamol 500mg',
+                price: 5.99,
+                cost: 2.50,
+                qty: 200,
+                expiry: new Date(nextYear.getTime() + 6 * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+            }
+        ]);
+    }
+}
+
+// ==================== EVENT LISTENERS ====================
+document.addEventListener('DOMContentLoaded', async () => {
+    // Login events
+    document.getElementById('loginBtn').addEventListener('click', handleLogin);
+    document.getElementById('loginUsername').addEventListener('keypress', e => {
+        if (e.key === 'Enter') document.getElementById('loginPassword').focus();
+    });
+    document.getElementById('loginPassword').addEventListener('keypress', e => {
+        if (e.key === 'Enter') handleLogin();
+    });
+    
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        Swal.fire({
+            title: 'Logout?',
+            icon: 'question',
+            showCancelButton: true
+        }).then(result => {
+            if (result.isConfirmed) {
+                localStorage.removeItem(CONFIG.STORAGE_KEYS.SESSION);
+                currentUser = null;
+                showLogin();
+            }
+        });
+    });
+    
+    // Export (Admin only)
+    document.getElementById('exportBtn')?.addEventListener('click', () => {
+        const data = {
+            users: loadData(CONFIG.STORAGE_KEYS.USERS),
+            sales: loadData(CONFIG.STORAGE_KEYS.SALES),
+            products: loadData(CONFIG.STORAGE_KEYS.PRODUCTS)
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `pharmacy_backup_${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+    
+    // POS events
+    
+    // Products events (will be hidden for cashier)
+    document.getElementById('productForm')?.addEventListener('submit', handleProductSubmit);
+    document.getElementById('filterProd')?.addEventListener('input', debounce(() => {
+        const search = document.getElementById('filterProd').value;
+        renderProductsTable(search);
+    }, 300));
+    
+    // Reports events
+    document.getElementById('reportRange').addEventListener('change', handleReportRangeChange);
+    document.getElementById('rFrom').addEventListener('change', renderReports);
+    document.getElementById('rTo').addEventListener('change', renderReports);
+    document.getElementById('printExpiryReportBtn').addEventListener('click', printExpiryReport);
+    
+    
+    // Initialize
+    await initDefaultData();
+    await checkSession();
+});
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Global function references for onclick handlers
+window.editProduct = editProduct;
+window.deleteProduct = deleteProduct;
+</script>
+
+</body>
+</html>
+
